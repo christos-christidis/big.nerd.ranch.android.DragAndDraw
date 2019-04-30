@@ -4,6 +4,9 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PointF;
+import android.os.Bundle;
+import android.os.Parcelable;
+import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -16,8 +19,11 @@ class BoxDrawingView extends View {
 
     private static final String LOG_TAG = "BoxDrawingView";
 
+    private static final String PARENT_VIEW_STATE = "PARENT_VIEW_STATE";
+    private static final String BOXES = "boxes";
+
     private Box mCurrentBox;
-    private final List<Box> mBoxes = new ArrayList<>();
+    private List<Box> mBoxes = new ArrayList<>();
 
     private final Paint mBoxPaint;
     private final Paint mBackgroundPaint;
@@ -80,5 +86,22 @@ class BoxDrawingView extends View {
         Log.i(LOG_TAG, action + " at x=" + current.x + ", y=" + current.y);
 
         return true;
+    }
+
+    // SOS: These methods will be called only if the view has an id (I give it one in the layout file)
+    @Nullable
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(PARENT_VIEW_STATE, super.onSaveInstanceState());
+        bundle.putParcelableArrayList(BOXES, (ArrayList<Box>) mBoxes);
+        return bundle;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+        Bundle bundle = (Bundle) state;
+        super.onRestoreInstanceState(bundle.getParcelable(PARENT_VIEW_STATE));
+        mBoxes = bundle.getParcelableArrayList(BOXES);
     }
 }
